@@ -1,0 +1,7 @@
+interface:
+  display_name: "互动空间创作"
+  short_description: "生成可离线上传的互动 H5 作品"
+  default_prompt: "使用 $interact_creation 生成一个可离线运行、可上传的互动空间 H5 作品。"
+
+policy:
+  allow_implicit_invocation: true
