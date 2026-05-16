@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>12345 - 开始界面</title>
+  <style>
+    :root {
+      --bg-1: #07111f;
+      --bg-2: #112541;
+      --panel: rgba(12, 23, 41, 0.82);
+      --panel-border: rgba(120, 184, 255, 0.2);
+      --text-main: #f3f7ff;
+      --text-sub: #afc2df;
+      --accent: #5fd2ff;
+      --accent-2: #7af5b1;
+      --button-dark: rgba(255, 255, 255, 0.08);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      font-family: "Arial", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(95, 210, 255, 0.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(122, 245, 177, 0.14), transparent 28%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      color: var(--text-main);
+    }
+
+    body {
+      position: relative;
+    }
+
+    .page {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 100dvh;
+      padding:
+        max(24px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
+    }
+
+    .page::before,
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: auto;
+      border-radius: 50%;
+      filter: blur(8px);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .page::before {
+      top: 8%;
+      left: 6%;
+      width: 180px;
+      height: 180px;
+      background: rgba(95, 210, 255, 0.14);
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+
+    .page::after {
+      right: 8%;
+      bottom: 10%;
+      width: 220px;
+      height: 220px;
+      background: rgba(122, 245, 177, 0.12);
+      animation: floatOrb 10s ease-in-out infinite reverse;
+    }
+
+    .panel {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 460px);
+      padding: 32px 28px;
+      border: 1px solid var(--panel-border);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: 14px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(44px, 10vw, 76px);
+      line-height: 0.95;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 24px rgba(95, 210, 255, 0.18);
+    }
+
+    .subtitle {
+      margin: 16px 0 0;
+      color: var(--text-sub);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      width: 100%;
+      min-height: 56px;
+      border-radius: 16px;
+      padding: 0 18px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #3fa6ff);
+      box-shadow: 0 14px 28px rgba(63, 166, 255, 0.28);
+    }
+
+    .btn-secondary {
+      background: var(--button-dark);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+      color: var(--text-sub);
+      font-size: 14px;
+    }
+
+    .sound-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sound-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 16px rgba(122, 245, 177, 0.48);
+      transition: background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .sound-pill.muted .sound-dot {
+      background: #8a97a8;
+      box-shadow: none;
+    }
+
+    .credits-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      overflow: hidden;
+    }
+
+    .credits {
+      position: relative;
+      width: min(100%, 420px);
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .credit-line {
+      position: absolute;
+      right: 0;
+      width: 100%;
+      text-align: right;
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 700;
+      color: rgba(243, 247, 255, 0.92);
+      letter-spacing: 0.12em;
+      opacity: 0;
+      transform: translateX(24px);
+      animation: creditFade 7.5s ease-in-out infinite;
+      text-shadow: 0 0 24px rgba(95, 210, 255, 0.16);
+    }
+
+    .credit-line span {
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(14px, 2vw, 18px);
+      color: var(--text-sub);
+      letter-spacing: 0.08em;
+      font-weight: 400;
+    }
+
+    .credit-line:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .credit-line:nth-child(2) {
+      animation-delay: 2.5s;
+    }
+
+    .credit-line:nth-child(3) {
+      animation-delay: 5s;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      z-index: 10;
+      min-width: 180px;
+      max-width: calc(100vw - 32px);
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(7, 17, 31, 0.9);
+      border: 1px solid rgba(95, 210, 255, 0.24);
+      color: var(--text-main);
+      font-size: 15px;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transform: translate(-50%, 24px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+    }
+
+    .toast.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+    }
+
+    @keyframes creditFade {
+      0% {
+        opacity: 0;
+        transform: translateX(24px);
+      }
+      12%,
+      26% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      38%,
+      100% {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+    }
+
+    @keyframes floatOrb {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(8px, -14px, 0) scale(1.04);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .panel {
+        width: min(100%, 520px);
+      }
+
+      .credits-wrap {
+        width: 100%;
+        min-height: 180px;
+      }
+
+      .credits {
+        min-height: 160px;
+      }
+
+      .credit-line {
+        text-align: center;
+        right: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .panel {
+        padding: 24px 20px;
+        border-radius: 22px;
+      }
+
+      .subtitle {
+        font-size: 15px;
+      }
+
+      .btn {
+        min-height: 52px;
+        font-size: 17px;
+      }
+
+      .meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel" aria-labelledby="page-title">
+      <p class="eyebrow">Start Scene</p>
+      <h1 id="page-title" class="title">12345</h1>
+
+      <div class="actions">
+        <button id="startButton" class="btn btn-primary" type="button">开始游戏</button>
+        <button id="soundButton" class="btn btn-secondary" type="button">音效：开启</button>
+      </div>
+
+      <div class="meta">
+        <span>名字：12345</span>
+        <div id="soundPill" class="sound-pill" aria-live="polite">
+          <span class="sound-dot" aria-hidden="true"></span>
+          <span id="soundState">音效已开启</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="credits-wrap" aria-label="制作人员">
+      <div class="credits">
+        <div class="credit-line">名字 12345<span>欢迎进入开始界面</span></div>
+        <div class="credit-line">程序 xxx<span>Programmer</span></div>
+        <div class="credit-line">策划 xxx<span>Planner</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite" aria-hidden="true"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "start_scene_sound_enabled";
+
+      function initApp() {
+        const startButton = document.getElementById("startButton");
+        const soundButton = document.getElementById("soundButton");
+        const soundState = document.getElementById("soundState");
+        const soundPill = document.getElementById("soundPill");
+        const toast = document.getElementById("toast");
+
+        let toastTimer = 0;
+        let soundEnabled = loadSoundState();
+
+        function showToast(message) {
+          if (!toast) {
+            return;
+          }
+          toast.textContent = message;
+          toast.classList.add("active");
+          toast.setAttribute("aria-hidden", "false");
+          window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(function () {
+            toast.classList.remove("active");
+            toast.setAttribute("aria-hidden", "true");
+          }, 1800);
+        }
+
+        function syncSoundUi() {
+          if (!soundButton || !soundState || !soundPill) {
+            return;
+          }
+          soundButton.textContent = soundEnabled ? "音效：开启" : "音效：关闭";
+          soundState.textContent = soundEnabled ? "音效已开启" : "音效已关闭";
+          soundPill.classList.toggle("muted", !soundEnabled);
+        }
+
+        function loadSoundState() {
+          try {
+            const savedValue = window.localStorage.getItem(STORAGE_KEY);
+            if (savedValue === null) {
+              return true;
+            }
+            return savedValue === "1";
+          } catch (error) {
+            console.warn("读取音效状态失败", error);
+            return true;
+          }
+        }
+
+        function saveSoundState() {
+          try {
+            window.localStorage.setItem(STORAGE_KEY, soundEnabled ? "1" : "0");
+          } catch (error) {
+            console.warn("保存音效状态失败", error);
+          }
+        }
+
+        startButton.addEventListener("click", function () {
+          showToast("开始游戏");
+        });
+
+        soundButton.addEventListener("click", function () {
+          soundEnabled = !soundEnabled;
+          saveSoundState();
+          syncSoundUi();
+          showToast(soundEnabled ? "音效已开启" : "音效已关闭");
+        });
+
+        syncSoundUi();
+      }
+
+      window.addEventListener("load", function () {
+        try {
+          initApp();
+        } catch (error) {
+          console.error(error);
+          const fallback = document.createElement("div");
+          fallback.style.cssText = "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;color:#111;font-size:18px;padding:24px;text-align:center;z-index:9999;";
+          fallback.textContent = "哎呀，出错了，请重启试试吧~";
+          document.body.innerHTML = "";
+          document.body.appendChild(fallback);
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
