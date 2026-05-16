@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Scene 1 - 平台跳跃</title>
+  <style>
+    :root {
+      --screen-ink: rgba(28, 41, 12, 0.96);
+      --screen-ink-soft: rgba(40, 56, 18, 0.76);
+      --tap-active: rgba(255, 255, 255, 0.055);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      font-family: "Courier New", "SFMono-Regular", monospace;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewport {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+
+    .console {
+      position: relative;
+      width: min(100vw, calc(100dvh * 1596 / 2626));
+      aspect-ratio: 1596 / 2626;
+      overflow: hidden;
+    }
+
+    .console-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(180deg, #f7f4ec 0%, #e8e3d9 72%, #d4cec2 100%);
+      border-radius: 7% 7% 10% 10%;
+      box-shadow:
+        inset 0 0 0 3px rgba(0, 0, 0, 0.08),
+        inset 0 -22px 48px rgba(0, 0, 0, 0.08);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+
+    .console.is-fallback .console-fallback {
+      opacity: 1;
+    }
+
+    .fallback-bezel {
+      position: absolute;
+      left: 7%;
+      top: 7.8%;
+      width: 86%;
+      height: 41.5%;
+      padding: 8%;
+      border-radius: 4% 4% 10% 4%;
+      background: #80808f;
+      box-shadow:
+        inset 0 0 0 10px rgba(44, 44, 54, 0.5),
+        inset 0 14px 30px rgba(255, 255, 255, 0.06);
+    }
+
+    .fallback-screen-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #b6c847, #cadb62);
+      box-shadow: inset 0 0 0 3px rgba(91, 101, 35, 0.22);
+    }
+
+    .fallback-dpad {
+      position: absolute;
+      left: 7%;
+      top: 62.2%;
+      width: 26%;
+      height: 16%;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .fallback-dpad::before,
+    .fallback-dpad::after {
+      content: "";
+      position: absolute;
+      background: #2d2d32;
+      border-radius: 8px;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.04);
+    }
+
+    .fallback-dpad::before {
+      left: 37%;
+      top: 8%;
+      width: 26%;
+      height: 84%;
+    }
+
+    .fallback-dpad::after {
+      left: 9%;
+      top: 36%;
+      width: 82%;
+      height: 28%;
+    }
+
+    .fallback-button {
+      position: absolute;
+      width: 13%;
+      height: 8%;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .fallback-button::before {
+      content: "";
+      position: absolute;
+      inset: 13%;
+      border-radius: 50%;
+      background: #fbfbfa;
+      box-shadow: inset 0 0 0 2px rgba(188, 160, 160, 0.35);
+    }
+
+    .fallback-button-b {
+      left: 61.5%;
+      top: 67.1%;
+    }
+
+    .fallback-button-a {
+      left: 78.8%;
+      top: 61.7%;
+    }
+
+    .fallback-speaker {
+      position: absolute;
+      right: 10%;
+      bottom: 10.8%;
+      width: 24%;
+      height: 12%;
+      border-radius: 24px;
+      background:
+        repeating-linear-gradient(
+          70deg,
+          transparent 0 13%,
+          rgba(0, 0, 0, 0.18) 13% 18%,
+          transparent 18% 27%
+        );
+      opacity: 0.7;
+    }
+
+    .console-art {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+
+    .console.is-fallback .console-art {
+      opacity: 0;
+    }
+
+    .screen {
+      position: absolute;
+      left: 25.8%;
+      top: 14.1%;
+      width: 48.9%;
+      height: 26.1%;
+      z-index: 2;
+      overflow: hidden;
+      background: transparent;
+      border-radius: 6px;
+    }
+
+    .hud {
+      position: absolute;
+      top: 5px;
+      left: 6px;
+      right: 6px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--screen-ink-soft);
+      font-size: clamp(8px, 1.6vw, 12px);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .playfield {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .stage-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .stage-node {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: block;
+      overflow: hidden;
+      color: var(--screen-ink);
+      font-weight: 700;
+      font-size: clamp(17px, 2.6vw, 25px);
+      line-height: 0.92;
+      white-space: pre;
+      letter-spacing: -0.08em;
+      text-shadow: 0 1px 0 rgba(210, 227, 132, 0.24);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .stage-node.ground {
+      color: rgba(21, 30, 9, 0.98);
+    }
+
+    .stage-node.wall {
+      font-size: clamp(14px, 2vw, 18px);
+      line-height: 0.78;
+      letter-spacing: -0.04em;
+      color: rgba(20, 29, 8, 0.98);
+    }
+
+    .player {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      width: 1em;
+      height: 1em;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      color: rgba(22, 30, 10, 0.98);
+      font-size: clamp(26px, 4vw, 34px);
+      line-height: 1;
+      font-weight: 700;
+      text-shadow: 0 1px 0 rgba(214, 231, 135, 0.28);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .hint {
+      position: absolute;
+      left: 6px;
+      bottom: 4px;
+      z-index: 4;
+      color: rgba(41, 59, 18, 0.82);
+      font-size: clamp(8px, 1.5vw, 11px);
+      letter-spacing: 0.08em;
+      pointer-events: none;
+    }
+
+    .hardware-controls {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+    }
+
+    .hardware-control {
+      position: absolute;
+      appearance: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+
+    .hardware-control:focus {
+      outline: none;
+    }
+
+    .hardware-control.pressed {
+      background: var(--tap-active);
+    }
+
+    .left-control {
+      left: 6%;
+      top: 64.6%;
+      width: 12.6%;
+      height: 8.9%;
+      border-radius: 22px 4px 4px 22px;
+    }
+
+    .right-control {
+      left: 19.6%;
+      top: 64.6%;
+      width: 12.6%;
+      height: 8.9%;
+      border-radius: 4px 22px 22px 4px;
+    }
+
+    .a-control {
+      left: 78.7%;
+      top: 61.9%;
+      width: 12.2%;
+      height: 9.1%;
+      border-radius: 50%;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="viewport">
+    <div id="console" class="console">
+      <div class="console-fallback" aria-hidden="true">
+        <div class="fallback-bezel">
+          <div class="fallback-screen-fill"></div>
+        </div>
+        <div class="fallback-dpad"></div>
+        <div class="fallback-button fallback-button-b"></div>
+        <div class="fallback-button fallback-button-a"></div>
+        <div class="fallback-speaker"></div>
+      </div>
+
+      <img id="consoleArt" class="console-art" src="../../assets/gb.jpg" alt="Game Boy 背景">
+
+      <section id="screen" class="screen" aria-label="平台跳跃屏幕">
+        <div class="hud">
+          <span>SCENE 1</span>
+          <span id="statusText">READY</span>
+        </div>
+
+        <div id="playfield" class="playfield">
+          <div id="stageLayer" class="stage-layer" aria-hidden="true"></div>
+          <div id="player" class="player" aria-label="玩家">O</div>
+        </div>
+
+        <div class="hint">LEFT / RIGHT / A</div>
+      </section>
+
+      <div class="hardware-controls" aria-label="掌机按键">
+        <button id="leftButton" class="hardware-control left-control" type="button" aria-label="向左">
+          <span class="sr-only">向左</span>
+        </button>
+        <button id="rightButton" class="hardware-control right-control" type="button" aria-label="向右">
+          <span class="sr-only">向右</span>
+        </button>
+        <button id="jumpButton" class="hardware-control a-control" type="button" aria-label="跳跃">
+          <span class="sr-only">A 跳跃</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const consoleNode = document.getElementById("console");
+      const consoleArt = document.getElementById("consoleArt");
+      const playfield = document.getElementById("playfield");
+      const stageLayer = document.getElementById("stageLayer");
+      const playerNode = document.getElementById("player");
+      const statusNode = document.getElementById("statusText");
+      const leftButton = document.getElementById("leftButton");
+      const rightButton = document.getElementById("rightButton");
+      const jumpButton = document.getElementById("jumpButton");
+
+      if (!consoleNode || !consoleArt || !playfield || !stageLayer || !playerNode || !statusNode || !leftButton || !rightButton || !jumpButton) {
+        return;
+      }
+
+      const controls = {
+        left: false,
+        right: false,
+        jumpQueued: false
+      };
+
+      const state = {
+        viewWidth: 0,
+        viewHeight: 0,
+        worldWidth: 0,
+        cameraX: 0,
+        moveSpeed: 0,
+        jumpVelocity: 0,
+        gravity: 0,
+        playerWidth: 0,
+        playerHeight: 0,
+        stageNodes: [],
+        solids: [],
+        jumpBufferTimer: 0,
+        coyoteTimer: 0,
+        player: {
+          x: 24,
+          y: 0,
+          w: 0,
+          h: 0,
+          vx: 0,
+          vy: 0,
+          onGround: false
+        },
+        endWallX: 0
+      };
+
+      let lastFrame = 0;
+
+      function useFallbackConsole() {
+        consoleNode.classList.add("is-fallback");
+      }
+
+      function createStageNode() {
+        const node = document.createElement("div");
+        node.className = "stage-node";
+        stageLayer.appendChild(node);
+        return node;
+      }
+
+      function rectsIntersect(a, b) {
+        return a.x < b.x + b.width &&
+          a.x + a.width > b.x &&
+          a.y < b.y + b.height &&
+          a.y + a.height > b.y;
+      }
+
+      function buildWallText(width, height) {
+        const cols = Math.max(2, Math.round(width / 12));
+        const rows = Math.max(5, Math.round(height / 16));
+        const line = "|".repeat(cols);
+        return Array.from({ length: rows }, function () {
+          return line;
+        }).join("\n");
+      }
+
+      function setHoldState(button, key, active) {
+        controls[key] = active;
+        button.classList.toggle("pressed", active);
+      }
+
+      function queueJump(button) {
+        controls.jumpQueued = true;
+        state.jumpBufferTimer = 0.16;
+        button.classList.add("pressed");
+        window.setTimeout(function () {
+          button.classList.remove("pressed");
+        }, 120);
+      }
+
+      function bindHoldButton(button, key) {
+        button.addEventListener("pointerdown", function (event) {
+          event.preventDefault();
+          setHoldState(button, key, true);
+        });
+
+        ["pointerup", "pointerleave", "pointercancel"].forEach(function (type) {
+          button.addEventListener(type, function (event) {
+            event.preventDefault();
+            setHoldState(button, key, false);
+          });
+        });
+      }
+
+      function setupButtons() {
+        bindHoldButton(leftButton, "left");
+        bindHoldButton(rightButton, "right");
+
+        jumpButton.addEventListener("pointerdown", function (event) {
+          event.preventDefault();
+          queueJump(jumpButton);
+        });
+      }
+
+      function addSolid(kind, x, y, width, height) {
+        state.solids.push({ kind: kind, x: x, y: y, width: width, height: height });
+      }
+
+      function buildStage() {
+        const floorY = Math.round(state.viewHeight - Math.max(26, state.viewHeight * 0.14));
+        const surfaceH = Math.max(14, Math.round(state.viewHeight * 0.06));
+        const stairH = Math.max(18, Math.round(state.viewHeight * 0.08));
+        const screenW = state.viewWidth;
+        const wallWidth = Math.max(26, Math.round(screenW * 0.12));
+        const wallHeight = Math.round(state.viewHeight * 0.64);
+
+        state.worldWidth = Math.round(screenW * 6.2);
+        state.endWallX = Math.round(screenW * 5.55);
+        state.solids = [];
+
+        addSolid("ground", -60, floorY, Math.round(screenW * 1.02), surfaceH);
+        addSolid("platform", Math.round(screenW * 0.52), floorY - 46, Math.round(screenW * 0.26), surfaceH);
+
+        addSolid("ground", Math.round(screenW * 1.16), floorY, Math.round(screenW * 0.96), surfaceH);
+        addSolid("platform", Math.round(screenW * 1.46), floorY - 44, Math.round(screenW * 0.22), surfaceH);
+        addSolid("platform", Math.round(screenW * 1.76), floorY - 82, Math.round(screenW * 0.22), surfaceH);
+
+        addSolid("ground", Math.round(screenW * 2.28), floorY, Math.round(screenW * 0.78), surfaceH);
+        addSolid("platform", Math.round(screenW * 2.68), floorY - 40, Math.round(screenW * 0.2), stairH);
+        addSolid("platform", Math.round(screenW * 2.88), floorY - 72, Math.round(screenW * 0.2), stairH);
+        addSolid("platform", Math.round(screenW * 3.08), floorY - 104, Math.round(screenW * 0.2), stairH);
+
+        addSolid("ground", Math.round(screenW * 3.46), floorY, Math.round(screenW * 1.24), surfaceH);
+        addSolid("platform", Math.round(screenW * 3.98), floorY - 58, Math.round(screenW * 0.28), surfaceH);
+        addSolid("platform", Math.round(screenW * 4.34), floorY - 102, Math.round(screenW * 0.28), surfaceH);
+
+        addSolid("ground", Math.round(screenW * 4.9), floorY, Math.round(screenW * 0.6), surfaceH);
+        addSolid("platform", Math.round(screenW * 5.14), floorY - 42, Math.round(screenW * 0.18), stairH);
+        addSolid("ground", Math.round(screenW * 5.32), floorY, Math.round(screenW * 0.23), surfaceH);
+        addSolid("wall", state.endWallX, floorY - wallHeight + surfaceH, wallWidth, wallHeight);
+
+        while (state.stageNodes.length < state.solids.length) {
+          state.stageNodes.push(createStageNode());
+        }
+
+        state.stageNodes.forEach(function (node, index) {
+          const solid = state.solids[index];
+          if (!solid) {
+            node.style.display = "none";
+            return;
+          }
+
+          node.style.display = "block";
+          node.className = "stage-node " + solid.kind;
+          node.style.width = solid.width + "px";
+          node.style.height = solid.height + "px";
+
+          if (solid.kind === "wall") {
+            node.textContent = buildWallText(solid.width, solid.height);
+          } else {
+            node.textContent = "-".repeat(Math.max(20, Math.ceil((solid.width + 36) / 6)));
+          }
+        });
+
+        state.player.x = Math.min(state.player.x, state.endWallX - state.player.w - 6);
+
+        if (!state.player.onGround) {
+          state.player.y = floorY - state.player.h;
+          state.player.vy = 0;
+          state.player.onGround = true;
+        } else {
+          state.player.y = Math.min(state.player.y, floorY - state.player.h);
+        }
+      }
+
+      function resizeWorld() {
+        state.viewWidth = playfield.clientWidth;
+        state.viewHeight = playfield.clientHeight;
+        state.player.w = Math.max(16, Math.round(state.viewWidth * 0.08));
+        state.player.h = Math.max(22, Math.round(state.viewHeight * 0.14));
+        state.playerWidth = state.player.w;
+        state.playerHeight = state.player.h;
+        state.moveSpeed = Math.max(150, Math.round(state.viewWidth * 0.95));
+        state.jumpVelocity = Math.max(360, Math.round(state.viewHeight * 2.35));
+        state.gravity = Math.max(760, Math.round(state.viewHeight * 4.75));
+
+        buildStage();
+      }
+
+      function updateStatus() {
+        const distance = String(Math.max(0, Math.round(state.player.x))).padStart(3, "0");
+        if (state.player.x + state.player.w >= state.endWallX - 4 && state.player.onGround) {
+          statusNode.textContent = "WALL " + distance;
+          return;
+        }
+        const mode = state.player.onGround ? (controls.left || controls.right ? "RUN" : "IDLE") : "AIR";
+        statusNode.textContent = mode + " " + distance;
+      }
+
+      function resolveHorizontal(previousX) {
+        const player = state.player;
+
+        state.solids.forEach(function (solid) {
+          const playerRect = {
+            x: player.x,
+            y: player.y,
+            width: player.w,
+            height: player.h
+          };
+
+          if (!rectsIntersect(playerRect, solid)) {
+            return;
+          }
+
+          if (player.vx > 0 && previousX + player.w <= solid.x + 2) {
+            player.x = solid.x - player.w;
+            player.vx = 0;
+          } else if (player.vx < 0 && previousX >= solid.x + solid.width - 2) {
+            player.x = solid.x + solid.width;
+            player.vx = 0;
+          }
+        });
+      }
+
+      function resolveVertical(previousY) {
+        const player = state.player;
+        player.onGround = false;
+        const edgeForgiveness = Math.max(4, Math.round(player.w * 0.12));
+
+        state.solids.forEach(function (solid) {
+          const playerRect = {
+            x: player.x,
+            y: player.y,
+            width: player.w,
+            height: player.h
+          };
+
+          const landingOverlap = player.x + player.w > solid.x - edgeForgiveness &&
+            player.x < solid.x + solid.width + edgeForgiveness &&
+            player.y + player.h >= solid.y &&
+            player.y < solid.y + solid.height;
+
+          if (player.vy >= 0 && previousY + player.h <= solid.y + 4 && landingOverlap) {
+            player.y = solid.y - player.h;
+            player.vy = 0;
+            player.onGround = true;
+            return;
+          }
+
+          if (!rectsIntersect(playerRect, solid)) {
+            return;
+          }
+
+          if (player.vy < 0 && previousY >= solid.y + solid.height - 2) {
+            player.y = solid.y + solid.height;
+            player.vy = 0;
+          }
+        });
+      }
+
+      function step(dt) {
+        const player = state.player;
+        const previousX = player.x;
+        const previousY = player.y;
+
+        state.jumpBufferTimer = Math.max(0, state.jumpBufferTimer - dt);
+        state.coyoteTimer = player.onGround ? 0.11 : Math.max(0, state.coyoteTimer - dt);
+
+        if ((controls.jumpQueued || state.jumpBufferTimer > 0) && state.coyoteTimer > 0) {
+          player.vy = -state.jumpVelocity;
+          player.onGround = false;
+          state.coyoteTimer = 0;
+          state.jumpBufferTimer = 0;
+        }
+        controls.jumpQueued = false;
+
+        player.vx = 0;
+        if (controls.left && !controls.right) {
+          player.vx = -state.moveSpeed;
+        } else if (controls.right && !controls.left) {
+          player.vx = state.moveSpeed;
+        }
+
+        player.x += player.vx * dt;
+        if (player.x < 0) {
+          player.x = 0;
+        }
+        resolveHorizontal(previousX);
+
+        player.vy += state.gravity * dt;
+        player.y += player.vy * dt;
+        resolveVertical(previousY);
+        if (player.onGround) {
+          state.coyoteTimer = 0.11;
+        }
+
+        if (player.y > state.viewHeight + player.h) {
+          const startGround = state.solids[0];
+          player.x = 24;
+          player.y = startGround.y - player.h;
+          player.vx = 0;
+          player.vy = 0;
+          player.onGround = true;
+          state.coyoteTimer = 0.11;
+          state.jumpBufferTimer = 0;
+          state.cameraX = 0;
+        }
+
+        if (player.x > state.worldWidth - player.w) {
+          player.x = state.worldWidth - player.w;
+        }
+
+        const cameraTarget = Math.max(0, Math.min(player.x - state.viewWidth * 0.38, state.worldWidth - state.viewWidth));
+        state.cameraX += (cameraTarget - state.cameraX) * Math.min(1, dt * 10);
+      }
+
+      function render() {
+        state.solids.forEach(function (solid, index) {
+          const node = state.stageNodes[index];
+          const screenX = solid.x - state.cameraX;
+          const visible = screenX + solid.width > -80 && screenX < state.viewWidth + 80;
+
+          node.style.visibility = visible ? "visible" : "hidden";
+          node.style.transform = "translate(" + screenX + "px, " + solid.y + "px)";
+        });
+
+        playerNode.style.transform = "translate(" + (state.player.x - state.cameraX) + "px, " + state.player.y + "px)";
+        updateStatus();
+      }
+
+      function tick(timestamp) {
+        if (!lastFrame) {
+          lastFrame = timestamp;
+        }
+
+        const dt = Math.min((timestamp - lastFrame) / 1000, 0.032);
+        lastFrame = timestamp;
+
+        let remaining = dt;
+        while (remaining > 0) {
+          const slice = Math.min(remaining, 1 / 120);
+          step(slice);
+          remaining -= slice;
+        }
+        render();
+        window.requestAnimationFrame(tick);
+      }
+
+      function onKeyDown(event) {
+        if (event.key === "ArrowLeft") {
+          controls.left = true;
+        } else if (event.key === "ArrowRight") {
+          controls.right = true;
+        } else if ((event.key === "a" || event.key === "A" || event.key === " " || event.key === "ArrowUp") && !event.repeat) {
+          controls.jumpQueued = true;
+          state.jumpBufferTimer = 0.16;
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+      }
+
+      function onKeyUp(event) {
+        if (event.key === "ArrowLeft") {
+          controls.left = false;
+        } else if (event.key === "ArrowRight") {
+          controls.right = false;
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+      }
+
+      function initConsoleArt() {
+        if (consoleArt.complete && consoleArt.naturalWidth > 0) {
+          return;
+        }
+
+        consoleArt.addEventListener("error", useFallbackConsole);
+        consoleArt.addEventListener("load", function () {
+          consoleNode.classList.remove("is-fallback");
+        });
+
+        window.setTimeout(function () {
+          if (!consoleArt.complete || consoleArt.naturalWidth === 0) {
+            useFallbackConsole();
+          }
+        }, 300);
+      }
+
+      function initApp() {
+        initConsoleArt();
+        setupButtons();
+        resizeWorld();
+        render();
+        window.addEventListener("keydown", onKeyDown, { passive: false });
+        window.addEventListener("keyup", onKeyUp, { passive: false });
+        window.addEventListener("resize", resizeWorld);
+        window.requestAnimationFrame(tick);
+      }
+
+      window.addEventListener("load", function () {
+        try {
+          initApp();
+        } catch (error) {
+          console.error(error);
+          const fallback = document.createElement("div");
+          fallback.style.cssText = "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.72);color:#fff;padding:24px;text-align:center;z-index:9999;";
+          fallback.textContent = "Scene 1 加载失败，请刷新重试。";
+          document.body.innerHTML = "";
+          document.body.appendChild(fallback);
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
