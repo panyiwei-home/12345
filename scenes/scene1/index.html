@@ -49,6 +49,9 @@
       width: min(100vw, calc(100dvh * 1596 / 2626));
       aspect-ratio: 1596 / 2626;
       overflow: hidden;
+      transform-origin: top left;
+      will-change: transform;
+      transition: width 2200ms cubic-bezier(0.2, 0.82, 0.18, 1), height 2200ms cubic-bezier(0.2, 0.82, 0.18, 1), inset 2200ms cubic-bezier(0.2, 0.82, 0.18, 1), transform 2200ms cubic-bezier(0.2, 0.82, 0.18, 1);
     }
 
     .console-fallback {
@@ -177,6 +180,7 @@
       object-fit: contain;
       pointer-events: none;
       -webkit-user-drag: none;
+      transition: opacity 280ms ease;
     }
 
     .console.is-fallback .console-art {
@@ -193,6 +197,13 @@
       overflow: hidden;
       background: transparent;
       border-radius: 6px;
+      transition:
+        left 520ms ease,
+        top 520ms ease,
+        width 520ms ease,
+        height 520ms ease,
+        border-radius 520ms ease,
+        background 520ms ease;
     }
 
     .hud {
@@ -223,6 +234,32 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
+      transition: opacity 260ms ease;
+    }
+
+    .speed-lines {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .speed-lines.active {
+      opacity: 1;
+    }
+
+    .speed-line {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(35, 52, 15, 0), rgba(35, 52, 15, 0.8) 22%, rgba(35, 52, 15, 0.96) 78%, rgba(35, 52, 15, 0));
+      box-shadow: 0 0 6px rgba(35, 52, 15, 0.22);
+      transform-origin: top center;
     }
 
     .stage-node {
@@ -283,10 +320,136 @@
       pointer-events: none;
     }
 
+    .screen-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(164, 186, 78, 0.86);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 220ms ease, visibility 220ms ease;
+    }
+
+    .screen-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .overlay-card {
+      max-width: min(280px, 90%);
+      padding: 20px 16px 14px;
+      border: 1px solid rgba(33, 48, 13, 0.32);
+      border-radius: 14px;
+      background: rgba(210, 225, 132, 0.68);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      color: rgba(22, 32, 10, 0.96);
+      text-align: center;
+    }
+
+    .rotate-top-hint {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(210, 225, 132, 0.75);
+      border: 1px solid rgba(33, 48, 13, 0.24);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      color: rgba(22, 32, 10, 0.96);
+      transform: translateX(-50%);
+    }
+
+    .rotate-icon {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+    }
+
+    .rotate-icon-phone {
+      position: absolute;
+      left: 10px;
+      top: 6px;
+      width: 14px;
+      height: 22px;
+      border: 2px solid rgba(22, 32, 10, 0.92);
+      border-radius: 4px;
+      transform: rotate(-28deg);
+    }
+
+    .rotate-icon-phone::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(22, 32, 10, 0.92);
+      transform: translateX(-50%);
+    }
+
+    .rotate-icon-arrow {
+      position: absolute;
+      inset: 0;
+      border: 2px solid transparent;
+      border-top-color: rgba(22, 32, 10, 0.9);
+      border-right-color: rgba(22, 32, 10, 0.9);
+      border-radius: 50%;
+      transform: rotate(16deg);
+      animation: rotatePromptSpin 1.6s linear infinite;
+    }
+
+    .rotate-icon-arrow::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: 4px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid rgba(22, 32, 10, 0.9);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      transform: rotate(18deg);
+    }
+
+    .rotate-top-text {
+      font-size: clamp(10px, 1.8vw, 13px);
+      letter-spacing: 0.08em;
+      line-height: 1.2;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .overlay-title {
+      margin: 0 0 8px;
+      font-size: clamp(16px, 3vw, 22px);
+      line-height: 1.1;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .overlay-text {
+      margin: 0;
+      font-size: clamp(11px, 2vw, 14px);
+      line-height: 1.5;
+      letter-spacing: 0.05em;
+    }
+
     .hardware-controls {
       position: absolute;
       inset: 0;
       z-index: 3;
+      transition: opacity 220ms ease;
     }
 
     .hardware-control {
@@ -345,6 +508,43 @@
       white-space: nowrap;
       border: 0;
     }
+
+    .console.landscape-mode {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 20;
+    }
+
+    .console.landscape-mode .hardware-controls {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .console.landscape-empty .stage-layer {
+      opacity: 0;
+    }
+
+    .console.landscape-empty .hint {
+      opacity: 0;
+    }
+
+    .console.landscape-mode .stage-layer {
+      opacity: 1;
+    }
+
+    .console.landscape-mode .hint {
+      opacity: 1;
+    }
+
+    @keyframes rotatePromptSpin {
+      from {
+        transform: rotate(16deg);
+      }
+      to {
+        transform: rotate(376deg);
+      }
+    }
   </style>
 </head>
 <body>
@@ -370,10 +570,25 @@
 
         <div id="playfield" class="playfield">
           <div id="stageLayer" class="stage-layer" aria-hidden="true"></div>
+          <div id="speedLines" class="speed-lines" aria-hidden="true"></div>
           <div id="player" class="player" aria-label="玩家">O</div>
         </div>
 
         <div class="hint">LEFT / RIGHT / A</div>
+
+        <div id="rotatePrompt" class="screen-overlay" aria-hidden="true">
+          <div class="rotate-top-hint" aria-hidden="true">
+            <div class="rotate-icon">
+              <div class="rotate-icon-phone"></div>
+              <div class="rotate-icon-arrow"></div>
+            </div>
+            <div class="rotate-top-text">rotate phone</div>
+          </div>
+          <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="rotate-title">
+            <h2 id="rotate-title" class="overlay-title">TURN SIDEWAYS</h2>
+            <p class="overlay-text">前方高墙挡住了去路。请把手机从竖屏转成横屏。</p>
+          </div>
+        </div>
       </section>
 
       <div class="hardware-controls" aria-label="掌机按键">
@@ -396,13 +611,15 @@
       const consoleArt = document.getElementById("consoleArt");
       const playfield = document.getElementById("playfield");
       const stageLayer = document.getElementById("stageLayer");
+      const speedLinesNode = document.getElementById("speedLines");
       const playerNode = document.getElementById("player");
       const statusNode = document.getElementById("statusText");
+      const rotatePrompt = document.getElementById("rotatePrompt");
       const leftButton = document.getElementById("leftButton");
       const rightButton = document.getElementById("rightButton");
       const jumpButton = document.getElementById("jumpButton");
 
-      if (!consoleNode || !consoleArt || !playfield || !stageLayer || !playerNode || !statusNode || !leftButton || !rightButton || !jumpButton) {
+      if (!consoleNode || !consoleArt || !playfield || !stageLayer || !speedLinesNode || !playerNode || !statusNode || !rotatePrompt || !leftButton || !rightButton || !jumpButton) {
         return;
       }
 
@@ -410,6 +627,13 @@
         left: false,
         right: false,
         jumpQueued: false
+      };
+
+      const SCREEN_FRAME = {
+        left: 0.258,
+        top: 0.141,
+        width: 0.489,
+        height: 0.261
       };
 
       const state = {
@@ -420,12 +644,22 @@
         moveSpeed: 0,
         jumpVelocity: 0,
         gravity: 0,
+        fallGravity: 0,
         playerWidth: 0,
         playerHeight: 0,
         stageNodes: [],
+        speedLines: [],
         solids: [],
         jumpBufferTimer: 0,
         coyoteTimer: 0,
+        mode: "platform",
+        zoomTimer: 0,
+        landscapeZoomScale: 1,
+        landscapeTargetX: 0,
+        landscapeTargetY: 0,
+        portraitPlayerWidth: 0,
+        portraitPlayerHeight: 0,
+        portraitPlayerFontSize: "",
         player: {
           x: 24,
           y: 0,
@@ -444,10 +678,55 @@
         consoleNode.classList.add("is-fallback");
       }
 
+      function isLandscapeViewport() {
+        return window.innerWidth > window.innerHeight;
+      }
+
+      function showRotatePrompt() {
+        rotatePrompt.classList.add("active");
+        rotatePrompt.setAttribute("aria-hidden", "false");
+      }
+
+      function hideRotatePrompt() {
+        rotatePrompt.classList.remove("active");
+        rotatePrompt.setAttribute("aria-hidden", "true");
+      }
+
+      function applyLandscapeZoom() {
+        const aspect = 1596 / 2626;
+        const baseWidth = Math.min(window.innerWidth, window.innerHeight * aspect);
+        const baseHeight = baseWidth / aspect;
+        const screenWidth = baseWidth * SCREEN_FRAME.width;
+        const screenHeight = baseHeight * SCREEN_FRAME.height;
+        const scale = Math.max(window.innerWidth / screenWidth, window.innerHeight / screenHeight);
+        const screenCenterX = baseWidth * (SCREEN_FRAME.left + SCREEN_FRAME.width * 0.5);
+        const screenCenterY = baseHeight * (SCREEN_FRAME.top + SCREEN_FRAME.height * 0.5);
+        const translateX = window.innerWidth * 0.5 - screenCenterX * scale;
+        const translateY = window.innerHeight * 0.5 - screenCenterY * scale;
+
+        consoleNode.style.width = baseWidth + "px";
+        consoleNode.style.height = baseHeight + "px";
+        consoleNode.style.transform = "translate3d(" + translateX + "px, " + translateY + "px, 0) scale(" + scale + ")";
+        state.landscapeZoomScale = scale;
+      }
+
+      function updateLandscapeTargets() {
+        const safeScale = Math.max(0.001, state.landscapeZoomScale);
+        state.landscapeTargetX = state.viewWidth * 0.5 - state.player.w / (2 * safeScale);
+        state.landscapeTargetY = state.viewHeight * 0.5 - state.player.h / (2 * safeScale);
+      }
+
       function createStageNode() {
         const node = document.createElement("div");
         node.className = "stage-node";
         stageLayer.appendChild(node);
+        return node;
+      }
+
+      function createSpeedLineNode() {
+        const node = document.createElement("div");
+        node.className = "speed-line";
+        speedLinesNode.appendChild(node);
         return node;
       }
 
@@ -467,12 +746,60 @@
         }).join("\n");
       }
 
+      function resetSpeedLines() {
+        const presets = [
+          { x: 0.16, y: -0.08, len: 28, speed: 390, drift: -10 },
+          { x: 0.28, y: -0.36, len: 36, speed: 470, drift: -14 },
+          { x: 0.43, y: -0.18, len: 24, speed: 420, drift: -9 },
+          { x: 0.58, y: -0.44, len: 34, speed: 500, drift: -12 },
+          { x: 0.72, y: -0.12, len: 30, speed: 450, drift: -11 },
+          { x: 0.84, y: -0.3, len: 38, speed: 520, drift: -15 }
+        ];
+
+        while (state.speedLines.length < presets.length) {
+          state.speedLines.push({
+            node: createSpeedLineNode(),
+            xRatio: 0,
+            yRatio: 0,
+            length: 0,
+            speed: 0,
+            drift: 0,
+            opacity: 1
+          });
+        }
+
+        state.speedLines.forEach(function (line, index) {
+          const preset = presets[index];
+          line.xRatio = preset.x;
+          line.yRatio = preset.y;
+          line.length = preset.len;
+          line.speed = preset.speed;
+          line.drift = preset.drift;
+          line.opacity = 0.5 + index * 0.08;
+        });
+      }
+
+      function updateSpeedLines(dt) {
+        state.speedLines.forEach(function (line, index) {
+          line.yRatio += (line.speed / Math.max(1, state.viewHeight)) * dt;
+          line.xRatio += (line.drift / Math.max(1, state.viewWidth)) * dt;
+
+          if (line.yRatio > 1.15) {
+            line.yRatio = -0.22 - index * 0.06;
+            line.xRatio = 0.14 + ((index * 0.17) % 0.72);
+          }
+        });
+      }
+
       function setHoldState(button, key, active) {
         controls[key] = active;
         button.classList.toggle("pressed", active);
       }
 
       function queueJump(button) {
+        if (state.mode !== "platform") {
+          return;
+        }
         controls.jumpQueued = true;
         state.jumpBufferTimer = 0.16;
         button.classList.add("pressed");
@@ -484,6 +811,9 @@
       function bindHoldButton(button, key) {
         button.addEventListener("pointerdown", function (event) {
           event.preventDefault();
+          if (state.mode !== "platform") {
+            return;
+          }
           setHoldState(button, key, true);
         });
 
@@ -579,6 +909,31 @@
       function resizeWorld() {
         state.viewWidth = playfield.clientWidth;
         state.viewHeight = playfield.clientHeight;
+
+        if (state.mode === "landscape-zoom" || state.mode === "landscape-fall" || state.mode === "landscape-rest") {
+          applyLandscapeZoom();
+          state.viewWidth = playfield.clientWidth;
+          state.viewHeight = playfield.clientHeight;
+          if (state.mode === "landscape-zoom") {
+            return;
+          }
+          state.gravity = Math.max(920, Math.round(state.viewHeight * 1.9));
+          state.fallGravity = state.gravity;
+          state.player.w = state.portraitPlayerWidth || state.player.w;
+          state.player.h = state.portraitPlayerHeight || state.player.h;
+          state.playerWidth = state.player.w;
+          state.playerHeight = state.player.h;
+          if (state.portraitPlayerFontSize) {
+            playerNode.style.fontSize = state.portraitPlayerFontSize;
+          }
+          updateLandscapeTargets();
+          state.player.x = state.landscapeTargetX;
+          if (state.mode === "landscape-rest") {
+            state.player.y = state.landscapeTargetY;
+          }
+          return;
+        }
+
         state.player.w = Math.max(16, Math.round(state.viewWidth * 0.08));
         state.player.h = Math.max(22, Math.round(state.viewHeight * 0.14));
         state.playerWidth = state.player.w;
@@ -586,11 +941,32 @@
         state.moveSpeed = Math.max(150, Math.round(state.viewWidth * 0.95));
         state.jumpVelocity = Math.max(360, Math.round(state.viewHeight * 2.35));
         state.gravity = Math.max(760, Math.round(state.viewHeight * 4.75));
+        state.fallGravity = Math.max(920, Math.round(state.viewHeight * 1.9));
 
         buildStage();
       }
 
       function updateStatus() {
+        if (state.mode === "await-rotate") {
+          statusNode.textContent = "ROTATE";
+          return;
+        }
+
+        if (state.mode === "landscape-zoom") {
+          statusNode.textContent = "ZOOM";
+          return;
+        }
+
+        if (state.mode === "landscape-fall") {
+          statusNode.textContent = "DROP";
+          return;
+        }
+
+        if (state.mode === "landscape-rest") {
+          statusNode.textContent = "CENTER";
+          return;
+        }
+
         const distance = String(Math.max(0, Math.round(state.player.x))).padStart(3, "0");
         if (state.player.x + state.player.w >= state.endWallX - 4 && state.player.onGround) {
           statusNode.textContent = "WALL " + distance;
@@ -661,8 +1037,110 @@
         });
       }
 
+      function clearControls() {
+        controls.left = false;
+        controls.right = false;
+        controls.jumpQueued = false;
+        leftButton.classList.remove("pressed");
+        rightButton.classList.remove("pressed");
+        jumpButton.classList.remove("pressed");
+      }
+
+      function enterRotateMode() {
+        if (state.mode !== "platform") {
+          return;
+        }
+
+        state.mode = "await-rotate";
+        clearControls();
+        state.jumpBufferTimer = 0;
+        state.coyoteTimer = 0;
+        state.player.vx = 0;
+        state.player.vy = 0;
+        state.player.x = Math.min(state.player.x, state.endWallX - state.player.w - 2);
+        showRotatePrompt();
+      }
+
+      function beginLandscapeFall() {
+        state.mode = "landscape-fall";
+        consoleNode.classList.add("landscape-empty");
+        state.solids = [];
+        state.jumpBufferTimer = 0;
+        state.coyoteTimer = 0;
+        state.cameraX = 0;
+        resetSpeedLines();
+        resizeWorld();
+        state.player.x = state.landscapeTargetX;
+        state.player.y = -Math.max(state.player.h * 1.2, 28);
+        state.player.vx = 0;
+        state.player.vy = 0;
+        state.player.onGround = false;
+      }
+
+      function enterLandscapeMode() {
+        if (state.mode === "landscape-zoom" || state.mode === "landscape-fall" || state.mode === "landscape-rest") {
+          return;
+        }
+
+        state.mode = "landscape-zoom";
+        state.zoomTimer = 1.8;
+        hideRotatePrompt();
+        clearControls();
+        state.portraitPlayerWidth = state.player.w;
+        state.portraitPlayerHeight = state.player.h;
+        state.portraitPlayerFontSize = window.getComputedStyle(playerNode).fontSize;
+        consoleNode.classList.add("landscape-mode");
+        consoleNode.classList.remove("landscape-empty");
+        resizeWorld();
+        state.player.vx = 0;
+        state.player.vy = 0;
+      }
+
       function step(dt) {
         const player = state.player;
+
+        if (state.mode === "await-rotate") {
+          if (isLandscapeViewport()) {
+            enterLandscapeMode();
+          }
+          updateStatus();
+          return;
+        }
+
+        if (state.mode === "landscape-zoom") {
+          state.zoomTimer = Math.max(0, state.zoomTimer - dt);
+          if (state.zoomTimer === 0) {
+            beginLandscapeFall();
+          }
+          updateStatus();
+          return;
+        }
+
+        if (state.mode === "landscape-fall") {
+          player.x = state.landscapeTargetX;
+          player.vy += state.fallGravity * dt;
+          player.y += player.vy * dt;
+          updateSpeedLines(dt);
+
+          if (player.y >= state.landscapeTargetY) {
+            player.y = state.landscapeTargetY;
+            player.vy = 0;
+            state.mode = "landscape-rest";
+          }
+
+          updateStatus();
+          return;
+        }
+
+        if (state.mode === "landscape-rest") {
+          player.x = state.landscapeTargetX;
+          player.y = state.landscapeTargetY;
+          player.vx = 0;
+          player.vy = 0;
+          updateStatus();
+          return;
+        }
+
         const previousX = player.x;
         const previousY = player.y;
 
@@ -713,6 +1191,12 @@
           player.x = state.worldWidth - player.w;
         }
 
+        if (player.x + player.w >= state.endWallX - 3 && player.onGround) {
+          enterRotateMode();
+          updateStatus();
+          return;
+        }
+
         const cameraTarget = Math.max(0, Math.min(player.x - state.viewWidth * 0.38, state.worldWidth - state.viewWidth));
         state.cameraX += (cameraTarget - state.cameraX) * Math.min(1, dt * 10);
       }
@@ -727,7 +1211,27 @@
           node.style.transform = "translate(" + screenX + "px, " + solid.y + "px)";
         });
 
-        playerNode.style.transform = "translate(" + (state.player.x - state.cameraX) + "px, " + state.player.y + "px)";
+        speedLinesNode.classList.toggle("active", state.mode === "landscape-fall");
+        if (state.mode === "landscape-fall" || state.mode === "landscape-rest") {
+          const inverseScale = 1 / Math.max(0.001, state.landscapeZoomScale);
+          state.speedLines.forEach(function (line) {
+            line.node.style.left = Math.round(state.viewWidth * line.xRatio) + "px";
+            line.node.style.top = Math.round(state.viewHeight * line.yRatio) + "px";
+            line.node.style.height = line.length + "px";
+            line.node.style.opacity = String(line.opacity);
+            line.node.style.transform = "rotate(-12deg) scale(" + inverseScale + ")";
+          });
+        }
+
+        if (state.mode === "landscape-fall" || state.mode === "landscape-rest") {
+          playerNode.style.left = state.player.x + "px";
+          playerNode.style.top = state.player.y + "px";
+          playerNode.style.transform = "scale(" + (1 / Math.max(0.001, state.landscapeZoomScale)) + ")";
+        } else {
+          playerNode.style.left = state.player.x - state.cameraX + "px";
+          playerNode.style.top = state.player.y + "px";
+          playerNode.style.transform = "";
+        }
         updateStatus();
       }
 
@@ -751,10 +1255,19 @@
 
       function onKeyDown(event) {
         if (event.key === "ArrowLeft") {
+          if (state.mode !== "platform") {
+            return;
+          }
           controls.left = true;
         } else if (event.key === "ArrowRight") {
+          if (state.mode !== "platform") {
+            return;
+          }
           controls.right = true;
         } else if ((event.key === "a" || event.key === "A" || event.key === " " || event.key === "ArrowUp") && !event.repeat) {
+          if (state.mode !== "platform") {
+            return;
+          }
           controls.jumpQueued = true;
           state.jumpBufferTimer = 0.16;
         } else {
@@ -800,7 +1313,12 @@
         render();
         window.addEventListener("keydown", onKeyDown, { passive: false });
         window.addEventListener("keyup", onKeyUp, { passive: false });
-        window.addEventListener("resize", resizeWorld);
+        window.addEventListener("resize", function () {
+          resizeWorld();
+          if (state.mode === "await-rotate" && isLandscapeViewport()) {
+            enterLandscapeMode();
+          }
+        });
         window.requestAnimationFrame(tick);
       }
 

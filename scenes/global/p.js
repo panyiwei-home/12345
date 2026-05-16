@@ -5,6 +5,7 @@
     ],
     landscape: [
       "/scenes/scene1/index.html",
+      "/scenes/scene2/index.html",
       "/scenes/global/index.html"
     ]
   };
@@ -212,7 +213,7 @@
     return expectedOrientation;
   }
 
-  window.SceneOrientation = {
+  window["SceneOrientation"] = {
     config: DEFAULT_CONFIG,
     ensureOrientation: ensureOrientation,
     getExpectedOrientation: getExpectedOrientation

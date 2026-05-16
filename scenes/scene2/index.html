@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>飞鸟穿越云环</title>
+  <style>
+    :root {
+      --bg-1: #edf7ff;
+      --bg-2: #dff1ff;
+      --bg-3: #cae5f6;
+      --glow-1: rgba(255, 255, 255, 0.96);
+      --glow-2: rgba(175, 225, 255, 0.56);
+      --hud-bg: rgba(55, 87, 112, 0.24);
+      --hud-border: rgba(255, 255, 255, 0.18);
+      --text-main: #f9fdff;
+      --text-sub: rgba(249, 253, 255, 0.82);
+      --accent: #ffd866;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 50% 48%, var(--glow-1) 0%, rgba(235, 248, 255, 0.9) 8%, var(--glow-2) 16%, rgba(175, 225, 255, 0.08) 26%, transparent 38%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 56%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 58%, var(--bg-3) 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(210, 233, 248, 0.38), rgba(210, 233, 248, 0) 26%),
+        radial-gradient(circle at 88% 16%, rgba(204, 230, 246, 0.34), rgba(204, 230, 246, 0) 22%),
+        radial-gradient(circle at 18% 84%, rgba(190, 220, 240, 0.24), rgba(190, 220, 240, 0) 24%);
+      opacity: 1;
+    }
+
+    body::after {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(130, 176, 208, 0) 22%, rgba(130, 176, 208, 0.08) 50%, rgba(107, 156, 191, 0.2) 100%);
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+    }
+
+    #scene-root {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+    }
+
+    #scene-root.boosting {
+      cursor: grabbing;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+    }
+
+    .hud {
+      position: fixed;
+      left: max(18px, env(safe-area-inset-left));
+      top: max(18px, env(safe-area-inset-top));
+      z-index: 8;
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .chip {
+      min-width: 132px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--hud-bg);
+      border: 1px solid var(--hud-border);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(52, 94, 126, 0.12);
+    }
+
+    .chip-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+
+    .chip-value {
+      display: block;
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .hint-bar {
+      position: fixed;
+      right: max(18px, env(safe-area-inset-right));
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: rgba(55, 87, 112, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text-main);
+      backdrop-filter: blur(10px);
+    }
+
+    .boost-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.36);
+      box-shadow: 0 0 0 rgba(255, 216, 102, 0);
+      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .hint-bar.boosting .boost-dot {
+      background: var(--accent);
+      transform: scale(1.16);
+      box-shadow: 0 0 16px rgba(255, 216, 102, 0.62);
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding:
+        max(24px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
+      background: rgba(68, 106, 132, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 200ms ease, visibility 200ms ease;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      width: min(92vw, 440px);
+      padding: 26px 22px;
+      border-radius: 24px;
+      background: rgba(49, 84, 108, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-main);
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(37, 71, 95, 0.22);
+      backdrop-filter: blur(18px);
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 36px);
+      letter-spacing: 0.08em;
+    }
+
+    .modal-message {
+      margin: 14px 0 0;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text-sub);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 22px;
+    }
+
+    .btn {
+      min-width: 132px;
+      min-height: 50px;
+      border: none;
+      border-radius: 14px;
+      padding: 0 18px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #123247;
+      background: #f4fbff;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #fff1a8, #ffd56a);
+    }
+
+    .btn-secondary {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 247, 236, 0.12);
+    }
+
+    @media (max-width: 720px) {
+      .hud {
+        gap: 8px;
+      }
+
+      .chip {
+        min-width: 110px;
+        padding: 10px 12px;
+      }
+
+      .chip-value {
+        font-size: 17px;
+      }
+
+      .hint-bar {
+        left: max(18px, env(safe-area-inset-left));
+        right: auto;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        max-width: calc(100vw - 36px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="scene-root" aria-label="飞鸟场景"></div>
+  </div>
+
+  <div class="hud">
+    <div class="chip">
+      <span class="chip-label">速度</span>
+      <span id="speedValue" class="chip-value">180</span>
+    </div>
+    <div class="chip">
+      <span class="chip-label">控制</span>
+      <span id="controlValue" class="chip-value">待启动</span>
+    </div>
+  </div>
+
+  <div id="boostHint" class="hint-bar">
+    <span class="boost-dot" aria-hidden="true"></span>
+    <span>长按屏幕加速，左右倾斜手机控制飞鸟方向</span>
+  </div>
+
+  <div id="screen-start" class="screen active" aria-hidden="false">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="screen-start-title">
+      <h1 id="screen-start-title" class="modal-title">飞鸟穿越云环</h1>
+      <p class="modal-message">横屏体验更完整。点击开始后会尝试开启陀螺仪控制；若当前设备不支持，会自动切换为手指左右拖动控制。长按屏幕会加速穿过层层云环，四周云墙包围感会更强。</p>
+      <div class="modal-actions">
+        <button id="startButton" class="btn btn-primary" type="button">开始飞行</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-message" class="screen" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="screen-message-title">
+      <h2 id="screen-message-title" class="modal-title">提示</h2>
+      <p id="messageText" class="modal-message">设备不支持陀螺仪，已切换为拖动控制。</p>
+      <div class="modal-actions">
+        <button id="messageButton" class="btn btn-secondary" type="button">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./p.js"></script>
+  <script src="./dist/app.js"></script>
+</body>
+</html>
